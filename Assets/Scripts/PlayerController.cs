@@ -7,12 +7,34 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float moveSpeed = 8f;
     [SerializeField] private float rotateSpeed = 10f;
     [SerializeField] private GameInput gameInput;
+    [SerializeField] private LayerMask countersLayerMask;
 
     private bool isWalking = false;
     private float playerHeight = 2f;
     private float playerRadius = 0.65f;
+    private const float interactDistance = 2f;
 
-    void Update()
+	void Start()
+	{
+        gameInput.OnInteractAction += GameInput_OnInteraction;
+	}
+
+    private void GameInput_OnInteraction(object sender, System.EventArgs e) {
+        if (Physics.Raycast(transform.position, transform.forward, out RaycastHit raycastHit, interactDistance, countersLayerMask))
+        {
+            if (raycastHit.transform.TryGetComponent(out ClearCounter clearCounter))
+            {
+                clearCounter.Interact();
+            }
+        }
+    }
+
+	void Update()
+    {
+        HandleMovement();
+    }
+
+    private void HandleMovement()
     {
         Vector2 moveDir2d = gameInput.GetMovementVecNormalized();
         Vector3 moveDir = new Vector3(moveDir2d.x, 0, moveDir2d.y);
